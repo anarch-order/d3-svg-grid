@@ -1,0 +1,11 @@
+{
+  "sources": [
+    "bower.json",
+    "package-lock.json"
+   ],
+  "lint": {
+    "rules": [
+      "polymer-2"
+    ]
+  }
+}

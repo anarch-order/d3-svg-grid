@@ -1,0 +1,128 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="/bower_components/d3-svg-symbol/d3-svg-symbol.html">
+<dom-module id="d3-svg-grid">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+    </style>
+    <h2>Hello [[symbol]]!</h2>
+
+  </template>
+  <script src="/node_modules/d3/build/d3.min.js"></script>
+  <script>
+    /**
+     * `d3-svg-grid`
+     * Simple clickable grid using d3_svg_symbol components.
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class D3SvgGrid extends Polymer.Element {
+      static get is() { return 'd3-svg-grid'; }
+      static get properties() {
+        return {
+          symbol: {
+            type: String,
+            value: 'square'
+          },
+          size: {
+            type: Number,
+            value: 200
+          },
+          columns: {
+            type: Number,
+            value: 8
+          },
+          rows: {
+            type: Number,
+            value: 8
+          },
+          primaryColor: {
+            type: String,
+            value: 'gray'
+          },
+          secondaryColor: {
+            type: String,
+            value: 'black'
+          },
+          background: {
+            type: String,
+            value: 'red'
+          },
+          symbolScale: {
+            type: Number,
+            value: 75,
+            notify: true,
+            readOnly: false,
+            reflectToAttribute: true
+          },
+          transitionDuration: {
+            type: Number,
+            value: 500,
+            notify: true,
+            readOnly: false
+          },
+          rowArray: {
+            type: Array,
+            value: function() { return []; }
+          },
+          columnArray: {
+            type: Array,
+            value: function() { return []; }
+          }
+        };
+      }
+
+      constructor() {
+        super();
+      }
+
+      ready() {
+        super.ready();
+
+        //Create the rows
+        for (var i = 0; i < this.rows; i++){
+          var row = document.createElement('div');
+          row.class = "row";
+          row.id = this.id + "_row_"+ i;
+          row.style.width = this.size + "px";
+          row.style.height = this.size / this.rows + "px";
+          row.style.background = this.background;
+          this.rowArray.unshift(row);
+          this.createCells(row);
+          document.body.appendChild(row);
+        }
+
+      }
+
+      createCells(row){
+        for (var j = 0; j < this.columns; j++){
+          var selected = d3.select("#" + row.id);
+          // var index = parseInt(row.id.replace("row_"));
+          var cell = document.createElement('d3-svg-symbol');
+          cell.class = "cell";
+          cell.size = this.size / this.columns;
+          cell.symbol = this.symbol;
+          cell.symbolScale = this.symbolScale;
+          cell.primaryColor = this.primaryColor;
+          cell.secondaryColor = this.secondaryColor;
+          cell.bounce = true;
+          cell.onClick = true;
+          cell.colorToggle = true;
+          cell.transitionDuration = this.transitionDuration;
+          cell.appendTo = "#" + row.id;
+          row.appendChild(cell);
+        }
+      }
+      
+    }
+
+    
+
+    window.customElements.define(D3SvgGrid.is, D3SvgGrid);
+  </script>
+</dom-module>
