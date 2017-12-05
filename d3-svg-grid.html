@@ -83,10 +83,22 @@
 
       ready() {
         super.ready();
+        var grid = document.createElement('div');
+        grid.id = this.id + "_grid";
+        grid.style.width = this.size + "px";
+        grid.style.height = this.size + "px";
+        this.createRows(grid);
 
-        //Create the rows
-        for (var i = 0; i < this.rows; i++){
+        this.storeColumns();
+      }
+
+      createRows(grid)
+      {
+        //Create the columns
+        for (var i = 0; i < this.rows; i++)
+        {
           var row = document.createElement('div');
+          var arr = [];
           row.class = "row";
           row.id = this.id + "_row_"+ i;
           row.style.width = this.size + "px";
@@ -94,17 +106,23 @@
           row.style.background = this.background;
           this.rowArray.unshift(row);
           this.createCells(row);
-          document.body.appendChild(row);
+          grid.appendChild(row);
         }
 
+        document.body.appendChild(grid);
+        
       }
 
-      createCells(row){
-        for (var j = 0; j < this.columns; j++){
+      createCells(row, index){
+        var arr = [];
+        //Add cells to the passed row
+        for (var j = 0; j < this.columns; j++)
+        {
           var selected = d3.select("#" + row.id);
-          // var index = parseInt(row.id.replace("row_"));
           var cell = document.createElement('d3-svg-symbol');
           cell.class = "cell";
+          cell.columnIndex = j;
+          cell.rowIndex = index;
           cell.size = this.size / this.columns;
           cell.symbol = this.symbol;
           cell.symbolScale = this.symbolScale;
@@ -115,7 +133,29 @@
           cell.colorToggle = true;
           cell.transitionDuration = this.transitionDuration;
           cell.appendTo = "#" + row.id;
+          arr.unshift(cell);
           row.appendChild(cell);
+        }
+
+        this.storeRow(index, arr);
+      }
+
+      storeRow(index, arr)
+      {
+        this.rowArray[index] = arr;
+      }
+
+      storeColumns()
+      {
+        var col = [];
+        for (var i = 0; i < this.columns; i++)
+        {
+           row = this.rowArray[i];
+
+           foreach(cell in row)
+           {
+              col.unshift(cell);
+           } 
         }
       }
       
