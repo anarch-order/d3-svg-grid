@@ -204,10 +204,6 @@
         }
       }
 
-      _onMouseOver(event){
-        console.log("mouse over grid");
-      }
-
       _isDrawing(){
         return this.drawing;
       }
@@ -221,9 +217,6 @@
 
           this.primaryCipher = window.crypto.getRandomValues(primary);
           this.secondaryCipher = window.crypto.getRandomValues(secondary);
-
-          console.log("the ciphers: ");
-          console.log(this.primaryCipher);
         }
       }
 
