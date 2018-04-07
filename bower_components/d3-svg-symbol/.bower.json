@@ -14,11 +14,11 @@
     "polymer": "^2.0.0"
   },
   "homepage": "https://github.com/anarch-order/d3-svg-symbol",
-  "_release": "a93c25da5f",
+  "_release": "20645af1e8",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "a93c25da5f4e60704892deb42c0aa68d09d1e3d6"
+    "commit": "20645af1e85c608d0fcae2d6b0c5198b4f9aebd5"
   },
   "_source": "https://github.com/anarch-order/d3-svg-symbol.git",
   "_target": "*",

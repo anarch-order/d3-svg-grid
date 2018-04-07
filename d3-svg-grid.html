@@ -5,6 +5,7 @@
     <style>
       :host {
         display: block;
+        pointer-events: all;
       }
 
     </style>
@@ -53,6 +54,27 @@
             type: String,
             value: 'red'
           },
+          colorArray: {
+            type: Array,
+            value: function() { return []; }
+          },
+          parseColors: {
+            type: String,
+            value: ''
+          },
+          strokeColor: {
+            type: String,
+            value: 'gray',
+            notify: true,
+            readOnly: false
+          },
+          strokeWidth: {
+            type: Number,
+            value: 0,
+            notify: true,
+            readOnly: false,
+            reflectToAttribute: true
+          },
           symbolScale: {
             type: Number,
             value: 75,
@@ -66,6 +88,10 @@
             notify: true,
             readOnly: false
           },
+          cellArray: {
+            type: Array,
+            value: function() { return []; }
+          },
           rowArray: {
             type: Array,
             value: function() { return []; }
@@ -73,6 +99,68 @@
           columnArray: {
             type: Array,
             value: function() { return []; }
+          },
+          cipher: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            observer:'_computeCiphers'
+          },
+          showCipher: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            observer:'_showCipher'
+          },
+          primaryCipher: {
+            type: Array,
+            value: function() { return []; }
+          },
+          secondaryCipher: {
+            type: Array,
+            value: function() { return []; }
+          },
+          onClick: {
+            type: Boolean,
+            value: false
+          },
+          onMouseOver: {
+            type: Boolean,
+            value: false
+          },
+          onMouseOut: {
+            type: Boolean,
+            value: false
+          },
+          onMouseDown: {
+            type: Boolean,
+            value: false
+          },
+          onMouseUp: {
+            type: Boolean,
+            value: false
+          },
+          draw: {
+            type: Boolean,
+            value: false
+          },
+          drawing: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            observer:'_onDrawing'
+          },
+          bounce: {
+            type: Boolean,
+            value: false
+          },
+          colorToggle: {
+            type: Boolean,
+            value: false
+          },
+          colorCycle: {
+            type: Boolean,
+            value: false
           }
         };
       }
@@ -83,13 +171,60 @@
 
       ready() {
         super.ready();
+        var self = this;
         var grid = document.createElement('div');
         grid.id = this.id + "_grid";
         grid.style.width = this.size + "px";
         grid.style.height = this.size + "px";
-        this.createRows(grid);
 
+        this.createRows(grid);
         this.storeColumns();
+
+        
+        if (window.PointerEvent) {
+
+          grid.addEventListener("pointerdown", function(){
+              self.drawing = true;
+          }, false);
+          grid.addEventListener("pointerup", function(){
+              self.drawing = false;
+          }, false);
+
+        }else{
+          grid.addEventListener("mousedown", function(){
+              self.drawing = true;
+          }, false);
+          grid.addEventListener("mouseup", function(){
+              self.drawing = false;
+          }, false);
+        }
+
+        if(this.cipher){
+          this._computeCiphers();
+        }
+      }
+
+      _onMouseOver(event){
+        console.log("mouse over grid");
+      }
+
+      _isDrawing(){
+        return this.drawing;
+      }
+
+      _computeCiphers(){
+
+        if(this.cipher){
+          var count = this.rows * this.columns;
+          var primary = new Uint32Array(count);
+          var secondary = new Uint32Array(count);
+
+          this.primaryCipher = window.crypto.getRandomValues(primary);
+          this.secondaryCipher = window.crypto.getRandomValues(secondary);
+
+          console.log("the ciphers: ");
+          console.log(this.primaryCipher);
+        }
       }
 
       createRows(grid)
@@ -128,34 +263,74 @@
           cell.symbolScale = this.symbolScale;
           cell.primaryColor = this.primaryColor;
           cell.secondaryColor = this.secondaryColor;
-          cell.bounce = true;
-          cell.onClick = true;
+          cell.parseColors = this.parseColors;
+          cell.strokeColor = this.strokeColor;
+          cell.strokeWidth = this.strokeWidth;
+          cell.bounce = this.bounce;
+          cell.onClick = this.onClick;
+          cell.onMouseOver = this.onMouseOver;
+          cell.onMouseOut = this.onMouseOut;
+          cell.draw = this.draw;
+          cell.drawing = this.drawing;
           cell.colorToggle = true;
           cell.transitionDuration = this.transitionDuration;
           cell.appendTo = "#" + row.id;
+          cell.controller.id = this.id;
+
+          cell.addEventListener("onDrawing", function(ev){
+            self.drawing = this.drawing;
+          })
+
+          this.cellArray.push(cell);
           arr.unshift(cell);
           row.appendChild(cell);
+          
         }
 
         this.storeRow(index, arr);
       }
 
-      storeRow(index, arr)
-      {
+      storeRow(index, arr){
         this.rowArray[index] = arr;
       }
 
-      storeColumns()
-      {
+      storeColumns() {
         var col = [];
         for (var i = 0; i < this.columns; i++)
         {
-           row = this.rowArray[i];
+           var row = this.rowArray[i];
 
-           foreach(cell in row)
+           for (var cell in row)
            {
               col.unshift(cell);
            } 
+        }
+      }
+
+      _onDrawing(value) {
+        this.cellArray.forEach(function(cell) {
+          cell.drawing = value;
+        });
+      }
+
+      _showCipher(on) {
+        
+        if(on){
+          for (var i = 0; i < this.cellArray.length; i++){
+
+            var cell = this.cellArray[i];
+            if(cell.state == 0){
+              cell.text = this.primaryCipher[i];
+            }
+            else if(cell.state == 1){
+              cell.text = this.secondaryCipher[i];
+            }
+          }
+        }
+        else{
+          this.cellArray.forEach(function(cell) {
+            cell.text = "";
+          });
         }
       }
       
